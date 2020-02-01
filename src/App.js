@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
 import { BrowserRouter, Switch, Route} from "react-router-dom";
+import axios from "axios";
+import cookie from "react-cookie";
 
 import Home from "./Components/Home/Home";
 import Signup from "./Components/Signup/Signup";
@@ -12,27 +14,57 @@ class App extends Component{
     super(props);
 
     this.state = {
-      loggedInStatus : "NO_LOGGED_IN",
+      loggedInStatus : "NOT_LOGGED_IN",
       token: ""
     }
 
     this.handleLogin = this.handleLogin.bind(this);
   }
 
-  handleLogin = (data) => {
-    console.log("[App.js] Reaching here");
-    this.setState({
-        loggedInStatus: "LOGGED_IN",
-        token: data.token
-    });
-    console.log("[App.js] state", this.state);
-  }
+    checkLoggedInStatus = () => {
+        axios.get("http://localhost:5000/user/auth",{
+            headers: {
+                authorization: "Bearer " + this.state.token
+            }
+        },
+        {
+            withCredentials: true
+        }).then(response => {
+            if(response.status == 200 && this.state.loggedInStatus === "NOT_LOGGED_IN"){
+                this.setState({
+                    loggedInStatus: "LoggedIn",
+                    token: "Bearer " + response.data.token
+                })
+            }
+            else if( response.status == 404 && this.state.loggedInStatus === "LoggedIn"){
+                this.setState({
+                    loggedInStatus: "NOT_LOGGED_IN",
+                    token: ""
+                });
+            }
+        }).catch(errors => {
+            console.log(errors.response);
+        })
+    }
 
-  render() {
-      return (
-          <div className="App">
-              <BrowserRouter>
-                <Switch>
+    componentDidMount () {
+        // this.checkLoggedInStatus();
+    }
+
+    handleLogin = (data) => {
+        console.log("[App.js] Reaching here");
+        this.setState({
+            loggedInStatus: "LOGGED_IN",
+            token: data.token
+        });
+        console.log("[App.js] state", this.state);
+    }
+
+    render() {
+        return (
+            <div className="App">
+                <BrowserRouter>
+                    <Switch>
 
                     <Route 
                         exact 
@@ -82,14 +114,12 @@ class App extends Component{
                                 token={this.state.token}
                             />
                         )}
-                    />
-                </Switch>
-              </BrowserRouter>
-          </div>
-      )
-  }
-
-
+                        />
+                    </Switch>
+                </BrowserRouter>
+            </div>
+        )
+    }
 }
 
 export default App;

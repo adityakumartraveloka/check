@@ -25,18 +25,18 @@ class Login extends Component{
     handleSubmit = event => {
         event.preventDefault();
         console.log('[Login.js] Prevent Default')
-        axios.post("http://localhost:5000/user/Login", {
+        axios.post("http://localhost:5000/user/login", {
             username: this.state.username,
             password: this.state.password
-        },{
-            withCredentials: true
-        }).then( response => {
+        })
+        .then( response => {
             if(response.status === 200){
                 this.props.handleSuccessfulAuth(response.data);
                 this.props.history.push("/");
             }
             console.log('[Login.js]',response);
-        }).catch(errors => {
+        })
+        .catch(errors => {
             console.log(errors.response);
         })
 

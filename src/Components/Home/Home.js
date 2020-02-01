@@ -1,8 +1,22 @@
 import React, { Component } from "react";
+import axios from "axios";
+
+
 
 class Home extends Component {
     constructor(props){
         super(props);
+    }
+
+    componentDidMount() {
+        axios.get("http://localhost:5000/album")
+            .then(response => {
+                console.log(response);
+                this.setState({album: response.data.data})
+            })
+            .then(error => {
+                console.log(error);
+            })
     }
 
     render() {
